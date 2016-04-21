@@ -1,0 +1,28 @@
+blockdata
+doubleprecision
+else if
+else where
+endassociate
+endblock
+endblockdata
+endcritical
+enddo
+endenum
+endfile
+endforall
+endfunction
+endif
+endinterface
+endmodule
+endprocedure
+endprogram
+endselect
+endsubmodule
+endsubroutine
+endtype
+endwhere
+goto
+inout
+selectcase
+selecttype
+
