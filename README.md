@@ -1,5 +1,6 @@
 Marver
 ======
+[![Build Status](https://api.travis-ci.org/benvanwerkhoven/marver.svg?branch=master)](https://travis-ci.org/benvanwerkhoven/marver)
 
 Marver is a tool for static code analysis, transformation, and
 user-guided source-to-source translation. The goal of Marver is to
