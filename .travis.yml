@@ -4,7 +4,6 @@ python:
   - "3.5"
 # command to install dependencies
 install:
-#  - pip install mock
 # command to run tests
 script: nosetests -v
 branches:
