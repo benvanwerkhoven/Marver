@@ -16,6 +16,15 @@ GPU code that - for the moment - needs to be finished by hand by the GPU
 programmer. The benefit of this approach is that GPU programmers remain
 in control over important design decisions on the GPU code.
 
+In order to produce human readable and maintainable code the
+source-to-source translations needs to be extremely high-level, and
+therefore the parsing extremely lightweight. Therfore, Marver performs
+very aggressive preprocessing combined with very simple parsing.
+
+Intended audience
+-----------------
+Experienced GPU Programmers that work with long-lived applications.
+
 
 Documentation
 -------------
