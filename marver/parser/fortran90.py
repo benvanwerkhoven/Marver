@@ -24,7 +24,6 @@ def parse(inputstring, root=None):
             last = last.parent
 
         else:
-            print last.value
             last.add_child(Node(line))
 
 
