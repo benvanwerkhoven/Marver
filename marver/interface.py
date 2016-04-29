@@ -1,6 +1,7 @@
 """ Marver's main user interface module
 
 """
+import parser.fortran90
 
 
 def open_file(filename):
@@ -9,7 +10,9 @@ def open_file(filename):
         return f.read()
 
 
-
+def parse(inputstring, lang="Fortran90"):
+    if lang == "Fortran90":
+        return parser.fortran90.parse(inputstring)
 
 
 

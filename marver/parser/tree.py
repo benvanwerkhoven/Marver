@@ -1,3 +1,4 @@
+import re
 
 class Node(object):
     """Main tree class for the code block tree
@@ -13,28 +14,20 @@ class Node(object):
         self.parent = None
         self.value = value.strip()
 
-    def set_parent(self, p):
-        self.parent = p
-
     def add_child(self, c):
         self.child.append(c)
-        c.set_parent(self)
+        c.parent = self
         return c
 
     def set_children(self, children):
         self.child = children
         for c in self.child:
-            c.set_parent(self)
-
-    def get_children(self):
-        return self.child
-
-    def get_value(self):
-        return self.value
+            c.parent = self
 
     def __str__(self):
         """simple output formatter function"""
         string = "-> " + self.value + "\n"
         for c in self.child:
-            string += "   " + str(c)
+            string += "   " + re.sub(r"\n", r"\n   ", str(c)).strip() + "\n"
         return string
+

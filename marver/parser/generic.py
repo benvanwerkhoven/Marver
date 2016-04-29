@@ -1,4 +1,4 @@
-
+import re
 
 def read_away_parenthesized(inputstring):
     just_started = True
@@ -15,4 +15,9 @@ def read_away_parenthesized(inputstring):
             just_started = False
         if counter == 0 and not just_started:
             return result, inputstring[i+1:]
+
+
+def starts_with(keyword, string):
+    return any([re.search(r"^\s*" + word + "\s+.*", string) for word in list(keyword)])
+
 
