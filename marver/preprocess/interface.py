@@ -2,35 +2,30 @@ from fortran90 import *
 from generic import *
 
 
-
-class Fortran90Preprocessor(object):
+def preprocess(inputstring):
     """Implements the Fortran90 preprocessor"""
 
-    def preprocess(inputstring):
+    inputstring = get_rid_of_carriage_returns(inputstring)
 
-        get_rid_of_carriage_returns(inputstring)
+    inputstring = separate_comment_starter(inputstring)
 
-        separate_comment_starter(inputstring)
+    inputstring = remove_comments(inputstring)
 
-        move_comments(inputstring)
+    inputstring = separate_parenthesis(inputstring)
 
-        remove_comments(inputstring)
+    inputstring = simplify_keywords(inputstring)
 
-        separate_parenthesis(inputsting)
+    inputstring = merge_multiline_statements(inputstring)
 
-        simplify_keywords(inputstring)
+    inputstring = rename_type_casts(inputstring)
 
-        merge_multiline_statements(inputstring)
+    inputstring = rename_typedefs(inputstring)
 
-        rename_type_casts(inputstring)
+    inputstring = correct_oneliner_if(inputstring)
 
-        rename_typedefs(inputstring)
+    inputstring = correct_oneliner_where(inputstring)
 
-        correct_oneliner_if(inputstring)
+    inputstring = collapse_whitespace(inputstring)
 
-        correct_oneliner_where(inputstring)
-
-        collapse_whitespace(inputstring)
-
-        return inputstring
+    return inputstring
 
