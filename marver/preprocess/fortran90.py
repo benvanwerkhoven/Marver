@@ -90,13 +90,12 @@ def correct_oneliner_if(inputstring):
     #is it possible to have a oneliner elseif in fortran? not sure yet
     def one_liner(matchobject):
         line = matchobject.group(0)
-        if re.search(r"\n\s*if[ \t]\(.*\).*then.*", line):
+        if re.search(r"\n\s*if[ \t]*\(.*\).*then.*", line):
             return line
         else:
             if_and_condition, rest = read_away_parenthesized(line)
-            return if_and_condition + " then\n " + rest + "\n end if"
-
-    inputstring = re.sub(r"\n\s*if[ \t]\(.*\).*", one_liner, inputstring, flags=re.IGNORECASE)
+            return if_and_condition + " then\n" + rest + "\nend if"
+    inputstring = re.sub(r"\n\s*if[ \t]*\(.*\).*", one_liner, inputstring, flags=re.IGNORECASE)
 
     return inputstring
 

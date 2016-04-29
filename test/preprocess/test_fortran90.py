@@ -115,16 +115,24 @@ def test_correct_oneliner_if():
     if (nice) then
         do something awesome
     endif
-    if (not_so_nice) do something evil
+    if (not_ ( so ) ( ) _nice) do something evil
     """
     expected = """ fortran
     if (nice) then
         do something awesome
     endif
-    if (not_so_nice) then
-  do something evil
- end if
+    if (not_ ( so ) ( ) _nice) then
+ do something evil
+end if
     """
+    output = fortran90.correct_oneliner_if(fortran_code)
+    print(output)
+    assert output == expected
+
+def test_correct_oneliner_if2():
+    fortran_code = "\nif (C(i) - D(i) > 1e-6) write (*,*) 'error at ', i, 'C(i)=', C(i), 'D(i)=', D(i)"
+    expected = "\nif (C(i) - D(i) > 1e-6) then\n write (*,*) 'error at ', i, 'C(i)=', C(i), 'D(i)=', D(i)\nend if"
+
     output = fortran90.correct_oneliner_if(fortran_code)
     print(output)
     assert output == expected
