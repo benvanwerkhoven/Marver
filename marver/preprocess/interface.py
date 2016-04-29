@@ -10,8 +10,6 @@ class Fortran90Preprocessor(object):
 
         get_rid_of_carriage_returns(inputstring)
 
-        get_rid_of_macros(inputstring)
-
         separate_comment_starter(inputstring)
 
         move_comments(inputstring)
@@ -36,6 +34,3 @@ class Fortran90Preprocessor(object):
 
         return inputstring
 
-
-    def tokenize(inputstring):
-        pass

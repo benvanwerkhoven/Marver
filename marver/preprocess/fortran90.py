@@ -1,9 +1,11 @@
 import re
 import os
 
+from marver.parser.generic import read_away_parenthesized
 
 def separate_comment_starter(inputstring):
-    return inputstring.replace("!", "! ")
+    inputstring = re.sub(r"(!+)\S+", r"\1 ", inputstring)
+    return inputstring
 
 def move_comments(inputstring):
     """move comments around a bit to simplify parsing
@@ -11,11 +13,11 @@ def move_comments(inputstring):
     Move comments that have non-whitespace characters before them
     on the same line to some place that makes sense
 
-    do not forget about full-line comments taht follow a line continuation &, example
+    do not forget about full-line comments that follow a line continuation &, example
     A = 174.5 * Year   &
     !  this is a comment line
     + Count / 100
-
+    if not moved here they will be removed by continuation character removal
 
     """
     pass
@@ -53,21 +55,64 @@ def merge_multiline_statements(inputstring):
     return inputstring
 
 def rename_type_casts(inputstring):
-    pass
+    """type casts can be confused with variable declaration without lookahead"""
+    def cast_or_not(matchobj):
+        line = matchobj.group(0)
+        #check if it is a declaration
+        if re.search(r"\n\s*real", line, flags=re.IGNORECASE):
+            return line
+        else:
+            #else, there are non-whitespace characters between 'real' and start of line
+            #assume it is a type cast
+            #check that no a-z0-9 char is right before 'real(' as a way to ensure 'real('
+            #is not a substring of some variable or function name
+            return re.sub(r"\n(.*?[^a-z0-9])real([ \t]*\()", r"\n\1 real_cast\2", line, flags=re.IGNORECASE)
+    inputstring = re.sub(r"\n.*real[ \t]*\(", cast_or_not, inputstring, flags=re.IGNORECASE)
+
+    return inputstring
+
 
 def rename_typedefs(inputstring):
-    """rename typedefs from 'type' to 'typedef', don't forget 'end typedef' """
-    pass
+    """rename derived type definitions from type to typedef"""
+    #replace variable declaration using a derived datatype with typeuse
+    inputstring = re.sub(r"(\n[ \t]*)type([ \t]*\()", r"\1typeuse\2", inputstring, flags=re.IGNORECASE)
+    #replace other occurences of type, that must be typedefs, with typedef
+    inputstring = re.sub(r"(\n[ \t]*)type([ \t]+)", r"\1typedef\2", inputstring, flags=re.IGNORECASE)
+    #also replace end type occurences with end typedef
+    inputstring = re.sub(r"(\n[ \t]*)end type([ \t]+)", r"\1end typedef\2", inputstring, flags=re.IGNORECASE)
+    #revert the temporary change from type to typeuse
+    inputstring = re.sub(r"(\n[ \t]*)typeuse([ \t]*\()", r"\1type\2", inputstring, flags=re.IGNORECASE)
+
+    return inputstring
 
 def correct_oneliner_if(inputstring):
     """oneliner ifs is a code style we avoid as it complicates parsing"""
-    pass
+    #is it possible to have a oneliner elseif in fortran? not sure yet
+    def one_liner(matchobject):
+        line = matchobject.group(0)
+        if re.search(r"\n\s*if[ \t]\(.*\).*then.*", line):
+            return line
+        else:
+            if_and_condition, rest = read_away_parenthesized(line)
+            return if_and_condition + " then\n " + rest + "\n end if"
+
+    inputstring = re.sub(r"\n\s*if[ \t]\(.*\).*", one_liner, inputstring, flags=re.IGNORECASE)
+
+    return inputstring
 
 def correct_oneliner_where(inputstring):
-    pass
+    """oneliner where statement is a code style we avoid as it complicates parsing"""
+    def check_non_whitespace(match):
+        line = match.group(0)
+        where_and_mask, rest = read_away_parenthesized(line)
+        #if rest only contains white space or a comment
+        if re.search(r"^\s*$", rest) or re.search(r"^\s*!.*$", rest):
+            return line
+        else:
+            return where_and_mask + "\n " + rest + "\n end where"
+    inputstring = re.sub(r"\n\s*where[ \t]*\(.*\).*", check_non_whitespace, inputstring, flags=re.IGNORECASE)
 
-def tokenize(inputstring):
-    """tokenize based on space, retain end-of-line somehow"""
-    pass
+    return inputstring
+
 
 

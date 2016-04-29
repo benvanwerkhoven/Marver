@@ -1,15 +1,16 @@
 from __future__ import print_function
-
-from ..context import fortran90
 import re
 
-def test_separate_comment_starter():
-    my_string = "fancy fortran90 code with a !comment"
-    output = fortran90.separate_comment_starter(my_string)
+from ..context import marver
+from marver.preprocess import fortran90
 
+def test_separate_comment_starter():
+    my_string = "fancy fortran90 code with a !!comment"
+    output = fortran90.separate_comment_starter(my_string)
+    print(output)
     assert "! " in output
-    #test for non-whitespace chars directly following !-char
-    assert re.search("!\S+", output) is None
+    #test for non-whitespace non-! chars directly following !-char
+    assert re.search("!\[^ \t\n\r\f\v!]+", output) is None
 
 def test_move_comments():
     pass
@@ -28,14 +29,16 @@ def test_remove_comments():
 
 def test_separate_parenthesis():
     my_string = "th()is is s(o((m))e) c(o+)mp(lic)))ated code"
+    expected = "th (  ) is is s ( o (  ( m )  ) e )  c ( o+ ) mp ( lic )  )  ) ated code"
     output = fortran90.separate_parenthesis(my_string)
     assert len(re.findall("\s\(\s", output)) == 6
     assert len(re.findall("\s\)\s", output)) == 8
     assert re.search("\S+\(\S+", output) is None
     assert re.search("\S+\)\S+", output) is None
+    assert output == expected
 
 def test_simplify_keywords():
-    fortran_code = """
+    fortran_code = """ fortran
     do k=1, 10
       DO i=55, -1000
         if (do_not_replace_this->if) then
@@ -55,7 +58,6 @@ def test_simplify_keywords():
     assert "else if" not in output
     assert "(do_not_replace_this->if)" in output
 
-
 def test_merge_multiline_statements():
     fortran_code = """ this is my&
     ! with a comment in between to make things even harder
@@ -67,26 +69,106 @@ def test_merge_multiline_statements():
     with it&
     &"""
     fortran_code = re.sub(r"\r", "", fortran_code)
-
     expected = " this is my fancy multi-line statement, and I'm cool with it"
-
     output = fortran90.merge_multiline_statements(fortran_code)
     assert output == expected
     assert "&" not in output
 
-
 def test_rename_type_casts():
-    pass
+    fortran_code = """ fortran
+    real (c_double) :: a, b, c
+    a = b*real(c)
+    d = my_fortran_is_surreal(b)
+    """
+    expected = """ fortran
+    real (c_double) :: a, b, c
+    a = b* real_cast(c)
+    d = my_fortran_is_surreal(b)
+    """
+    output = fortran90.rename_type_casts(fortran_code)
+    print(output)
+    assert output == expected
 
 def test_rename_typedefs():
-    pass
+    fortran_code = """ fancy Fortran type def
+    TYPE :: fancy_type
+      CHARACTER(15) :: name
+      REAL ::          f        ! real in my fancy type
+      INTEGER ::       i
+    END TYPE fancy_type
+    type(fancy_type) :: array_of_my_cool_type(30)
+    """
+    expected = """ fancy Fortran type def
+    typedef :: fancy_type
+      CHARACTER(15) :: name
+      REAL ::          f        ! real in my fancy type
+      INTEGER ::       i
+    end typedef fancy_type
+    type(fancy_type) :: array_of_my_cool_type(30)
+    """
+    output = fortran90.rename_typedefs(fortran_code)
+    print(output)
+    assert output == expected
 
 def test_correct_oneliner_if():
-    pass
+    fortran_code = """ fortran
+    if (nice) then
+        do something awesome
+    endif
+    if (not_so_nice) do something evil
+    """
+    expected = """ fortran
+    if (nice) then
+        do something awesome
+    endif
+    if (not_so_nice) then
+  do something evil
+ end if
+    """
+    output = fortran90.correct_oneliner_if(fortran_code)
+    print(output)
+    assert output == expected
 
 def test_correct_oneliner_where():
-    pass
+    fortran_code = """ fortran
+    where (mask_expression)
+        do something in construct
+    elsewhere (mask_expression)
+        do something else
+    end where
+    where (mask_expression) do something in statement
+    where (mask_expression) ! comment
+        do something in construct
+    end where
+    """
+    expected = """ fortran
+    where (mask_expression)
+        do something in construct
+    elsewhere (mask_expression)
+        do something else
+    end where
+    where (mask_expression)
+  do something in statement
+ end where
+    where (mask_expression) ! comment
+        do something in construct
+    end where
+    """
+    output = fortran90.correct_oneliner_where(fortran_code)
+    print(output)
+    assert output == expected
+
 
 def test_tokenize():
     pass
+
+
+
+
+
+
+
+
+
+
 
